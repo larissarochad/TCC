@@ -1,0 +1,92 @@
+reset;
+
+
+
+#incluoio modelo matematico
+
+model;
+include 2_FluxoPotenciaNaoLinear_Modificado.mod; 
+
+
+# ---------------- dados do sistemas -----------------------
+data;
+
+include 2_Sistema_69_Barras_Modificado.dat;
+
+# solucionador 
+
+option solver knitro; 
+
+solve FuncaoObjetivo;
+
+param Vpu{Ob};
+
+
+for {i in Ob} {
+let Vpu[i] := Vsqr[i]/Vnom^2;
+
+}
+
+#param VminCalculada = mini 
+#--------------------------
+
+printf '\n\n';
+printf'|------------------------------------|\n';
+printf'|  Solução do Fluxo de potência para |\n';
+printf'| Sistema de distribuição de energia | \n';
+printf'|------------------------------------|\n';
+
+printf 'Tensões \n';
+printf '|-----------|-----------|------------|\n';
+printf '|   Barra   |   V[kV]   |   V[p.u]   |\n';
+printf '|-----------|-----------|------------|\n';
+
+
+
+for {i in Ob}{
+	printf '%8d  %12.4f %11.4f \n', i,sqrt(Vsqr[i]), Vpu[i];
+
+}
+printf '|-----------|-----------|------------|\n';
+
+#-------------------------------------------------------
+
+
+param Pperdas{Ol}; # Perdas  de potencia ativa nas linhas 
+param Qperdas{Ol}; # Perdas de potencia reativa nas linhas 
+
+for {(i,j) in Ol}{
+	let Pperdas[i,j] := R[i,j]*Isqr[i,j]; 
+	let Qperdas[i,j] := X[i,j]*Isqr[i,j];
+}
+
+printf '\n\n Resultados Linhas: \n';
+printf '|-------|--------|------------|------------|--------------|---------------|----------------|\n';
+printf '|   i   |    j   |   I [Amp]  |   P [kW]   |   Q [kVAr]   |  Pperdas[kW]  | Qperdas [kVAr] |\n'; 
+printf '|-------|--------|------------|------------|--------------|---------------|----------------|\n';
+
+
+for {(i,j) in Ol}{
+ printf '%5d %8d %13.4f %13.4f %13.4f %13.4f %15.4f\n', i,j, sqrt(Isqr[i,j]), P[i,j], Q[i,j], Pperdas[i,j], Qperdas[i,j];
+
+}
+
+
+
+printf '\n\n';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
