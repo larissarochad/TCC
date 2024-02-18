@@ -91,7 +91,7 @@ subject to BalancoPotenciaReativa{i in Ob}:
 	
 #Queda de Tensao no circuito
 subject to QuedaTensao{(i,j) in Ol}:
-	Vsqr[i] - 2*(R[i,j] * P[i,j] + X[i,j]*Q[i,j]) - Z^2[i,j] * Isqr[i,j] - Vsqr[j] - b[i,j] = 0;
+	Vsqr[i] - 2*(R[i,j] * P[i,j] + X[i,j]*Q[i,j]) - Z2[i,j] * Isqr[i,j] - Vsqr[j] - b[i,j] = 0;
 	
 #Potencia aparente (kVA)
 subject to PotenciaAparente{(i,j) in Ol}:
