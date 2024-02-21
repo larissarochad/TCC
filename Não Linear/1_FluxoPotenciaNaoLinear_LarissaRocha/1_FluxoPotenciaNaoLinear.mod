@@ -20,6 +20,7 @@ param R{Ol}; 	#RESISTENCIA
 param X{Ol} ;	#reatancia indutiva
 param Imax{Ol};	# corrente maxima
 param Z2{Ol}; 
+param linha{Ol};
 
 param Vnom;
 param Vmin; 

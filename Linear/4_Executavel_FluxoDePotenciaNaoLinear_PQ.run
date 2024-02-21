@@ -4,6 +4,12 @@ reset;
 # incluir o modelo matematico
 #--------------------
 
+reset;
+
+#--------------------
+# incluir o modelo matematico
+#--------------------
+
 model;
 
 include 4_FluxoDePotenciaNaoLinear_PQ.mod;
@@ -21,7 +27,7 @@ include 4_Sistema_69_Barras_PQ.dat;
 
 
 option solver cplexamp;
-option cplex_options "mipdisplay = 2";
+option presolve_eps 8.53e-15;
 solve FuncaoObjetivo;
 
 param Vpu{Ob};
@@ -79,9 +85,10 @@ printf' Pperdas = %13.4f\n', sum{(i,j) in Ol}( Pperdas[i,j] );
 
 for{(i,j) in Ol}{
 	if(ymax[i,j] == 0 && ymin[i,j] == 0) then {
-	printf '\n %d %d \n', i,j; 
+	printf '\n %d \n', linha[i,j]; 
 	
 	}
 }
+	
 	
 	

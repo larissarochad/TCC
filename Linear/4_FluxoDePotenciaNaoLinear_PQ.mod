@@ -23,6 +23,7 @@ param R{Ol};	#Resistencia
 param X{Ol};	#Reatancia indutiva
 param Imax{Ol};	#Corrente maxima
 param Z2{Ol};	#Z^2 = R^2 + X^2
+param linha{Ol};
 
 
 #-- Definir as Variaveis --#
