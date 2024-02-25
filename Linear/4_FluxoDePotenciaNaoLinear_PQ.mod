@@ -1,5 +1,5 @@
 #------------------------------#
-# Fluxo de Potencia Nao Linear #
+# Fluxo de Potencia Linear #
 #------------------------------#
 
 #-- Definir os Conjuntos --#
