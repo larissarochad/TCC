@@ -75,6 +75,17 @@ var Qmin{Ol}>= 0;
 # 
 param ke = 168;
 
+# Variaveis para GD
+ 
+var Pgdmin{Ob}; # Pot min ativa injetada pela GD
+var Pgdmax{Ob}; # Pot max ativa injetada pela GD
+var Pgd{Ol}; # Pot ativa injetada pela GD
+#var Qgd{Ol}; # Pot reativa injetada pela GD
+param Ndg = 5;
+var Wgd{Ol}, binary;
+param fp = tan(acos(0.95)); 
+
+#-------------------------------------------------------------------
 #-- Funcao Objetivo --#
 
 minimize FuncaoObjetivo: ke *(sum{(i, j) in Ol}(R[i, j] * Isqr[i, j]));
@@ -83,11 +94,11 @@ minimize FuncaoObjetivo: ke *(sum{(i, j) in Ol}(R[i, j] * Isqr[i, j]));
 
 #Balanco de Potencia Ativa
 subject to BalancoPotenciaAtiva{i in Ob}:
-	sum{(k,i) in Ol}(P[k,i]) - sum{(i,j) in Ol}( P[i,j] + R[i,j]*Isqr[i,j] ) + PS[i] = PD[i];
+	sum{(k,i) in Ol}(P[k,i]) - sum{(i,j) in Ol}( P[i,j] + R[i,j]*Isqr[i,j] ) + PS[i] + Pgd[i] = PD[i];
 
 #Balanco de Potencia Reativa
 subject to BalancoPotenciaReativa{i in Ob}:
-	sum{(k,i) in Ol}(Q[k,i]) - sum{(i,j) in Ol}( Q[i,j] + X[i,j] * Isqr[i,j] ) + QS[i] = QD[i];
+	sum{(k,i) in Ol}(Q[k,i]) - sum{(i,j) in Ol}( Q[i,j] + X[i,j] * Isqr[i,j] ) + QS[i] +  (Pgd[i]*fp) = QD[i];
 	
 #Queda de Tensao no circuito
 subject to QuedaTensao{(i,j) in Ol}:
@@ -98,6 +109,7 @@ subject to PotenciaAparente{(i,j) in Ol}:
 	(Vmin^2 + 0.5 * DeltaV) * Isqr[i,j] + sum{s in 1..S}(Pc[j,s]) = sum{y in 1..Y}(ms[i,j,y]*DP[i,j,y]) + sum{y in 1..Y}(ms[i,j,y]*DQ[i,j,y]);
 	
 #-------------------------------------------------------------------------------	
+# Equações de reconfiguração
 # Limite de corrente colocar variaiveis 33 ate 40 
 subject to LimiteCorrente{(i,j) in Ol}:
 	0 <= Isqr[i,j];
@@ -168,7 +180,8 @@ subject to LinearizacaoP4{j in Ob, s in 2..S}:
 	
 
 	
-#---------------------------------------------------------------	
+#---------------------------------------------------------------
+#Equações de linearização	
 subject to LinearizacaoP1{(i,j) in Ol}:
  Pmax[i,j] - Pmin[i,j] = P[i,j];
  
@@ -189,5 +202,16 @@ subject to LinearizacaoP3{(i,j) in Ol, y in 1..Y}:
  
  subject to LinearizacaoQ3{(i,j) in Ol, y in 1..Y}:
   DQ[i,j,y]<= DS[i,j];
+  
+# ---------------------------------------------------------
+ # Equações da GD
+ subject to GD1{i in Ob}:
+ Pgdmin * Wgd[i] <= Pgd[i];
+ 
+ subject to GD2{i in Ob}:
+ Pgdmax * Wgd[i] >= Pgd[i];
+ 
+ subject to GD3{i in Ob}:
+ sum{i in Ob}(Wgd[i]) <= Ndg;
  
  
