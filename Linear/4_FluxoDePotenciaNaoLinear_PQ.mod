@@ -50,7 +50,7 @@ param N = card(Ob);
 
 # Para a linearização Vsqr * Isqr
 
-param S = 6;
+param S = 0;
 param DeltaV = (Vmax^2-Vmin^2)/(S+1);
 var xv{Ob, s in 1..S}, binary;
 var Pc{Ob, s in 1..S};
@@ -77,12 +77,12 @@ param ke = 168;
 
 # Variaveis para GD
  
-var Pgdmin{Ob}; # Pot min ativa injetada pela GD
-var Pgdmax{Ob}; # Pot max ativa injetada pela GD
-var Pgd{Ol}; # Pot ativa injetada pela GD
+param Pgdmin{Ob} = 0; # Pot min ativa injetada pela GD
+param Pgdmax{Ob} = 1000; # Pot max ativa injetada pela GD
+var Pgd{Ob}; # Pot ativa injetada pela GD
 #var Qgd{Ol}; # Pot reativa injetada pela GD
 param Ndg = 5;
-var Wgd{Ol}, binary;
+var Wgd{Ob}, binary;
 param fp = tan(acos(0.95)); 
 
 #-------------------------------------------------------------------
@@ -206,12 +206,12 @@ subject to LinearizacaoP3{(i,j) in Ol, y in 1..Y}:
 # ---------------------------------------------------------
  # Equações da GD
  subject to GD1{i in Ob}:
- Pgdmin * Wgd[i] <= Pgd[i];
+ Pgdmin[i] * Wgd[i] <= Pgd[i];
  
  subject to GD2{i in Ob}:
- Pgdmax * Wgd[i] >= Pgd[i];
+ Pgdmax[i] * Wgd[i] >= Pgd[i];
  
- subject to GD3{i in Ob}:
+ subject to GD3:
  sum{i in Ob}(Wgd[i]) <= Ndg;
  
  

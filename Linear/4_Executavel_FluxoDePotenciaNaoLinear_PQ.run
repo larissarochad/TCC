@@ -90,6 +90,7 @@ for{(i,j) in Ol}{
 	}
 }
 
-	
-	
-	
+#para imprimir a barra que está ativa a gd
+for {i in Ob: Wgd[i] == 1}{
+    printf "%d: Wgd = %f, Pgd = %f\n", i, Wgd[i], Pgd[i];
+}
