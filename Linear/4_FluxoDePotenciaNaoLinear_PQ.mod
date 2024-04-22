@@ -84,11 +84,12 @@ var Pgd{Ob}; # Pot ativa injetada pela GD
 param Ndg = 5;
 var Wgd{Ob}, binary;
 param fp = tan(acos(0.95)); 
-
+param custoGD = 10000;
+param idf = 0.1; # para considerar o retorno do capital em 20 anos 
 #-------------------------------------------------------------------
 #-- Funcao Objetivo --#
 
-minimize FuncaoObjetivo: ke *(sum{(i, j) in Ol}(R[i, j] * Isqr[i, j]));
+minimize FuncaoObjetivo: ke *(sum{(i, j) in Ol}(R[i, j] * Isqr[i, j])) + sum{i in Ob}(custoGD*Wgd[i])*idf;
 
 #-- Restricoes --#
 
@@ -202,6 +203,7 @@ subject to LinearizacaoP3{(i,j) in Ol, y in 1..Y}:
  
  subject to LinearizacaoQ3{(i,j) in Ol, y in 1..Y}:
   DQ[i,j,y]<= DS[i,j];
+  
   
 # ---------------------------------------------------------
  # Equações da GD
