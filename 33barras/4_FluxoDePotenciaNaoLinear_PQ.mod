@@ -1,5 +1,5 @@
 #------------------------------#
-# Fluxo de Potencia Nao Linear #
+# Fluxo de Potencia Linear #
 #------------------------------#
 
 #-- Definir os Conjuntos --#
@@ -8,7 +8,6 @@ set Ob;
 set Ol within Ob cross Ob; #Conjunto das linhas, que depende de Ob
 
 #-- Definir os Parametros --#
-
 # Dados das barras
 param Tb{Ob};	#Tipo de barra (1: SE, 0: Carga)
 param PD{Ob};	#Potencia ativa demandada
@@ -24,6 +23,7 @@ param R{Ol};	#Resistencia
 param X{Ol};	#Reatancia indutiva
 param Imax{Ol};	#Corrente maxima
 param Z2{Ol};	#Z^2 = R^2 + X^2
+param linha{Ol};
 
 
 #-- Definir as Variaveis --#
@@ -50,7 +50,7 @@ param N = card(Ob);
 
 # Para a linearização Vsqr * Isqr
 
-param S = 7;
+param S = 4;
 param DeltaV = (Vmax^2-Vmin^2)/(S+1);
 var xv{Ob, s in 1..S}, binary;
 var Pc{Ob, s in 1..S};
@@ -75,6 +75,18 @@ var Qmin{Ol}>= 0;
 # 
 param ke = 168;
 
+# Variaveis para GD
+ 
+param Pgdmin{Ob} = 0; # Pot min ativa injetada pela GD
+param Pgdmax{Ob} = 1000; # Pot max ativa injetada pela GD
+var Pgd{Ob}; # Pot ativa injetada pela GD
+#var Qgd{Ol}; # Pot reativa injetada pela GD
+param Ndg = 2;
+var Wgd{Ob}, binary;
+param fp = tan(acos(0.95)); 
+param custoGD = 10000;
+param idf = 0.1; # para considerar o retorno do capital em 20 anos 
+#-------------------------------------------------------------------
 #-- Funcao Objetivo --#
 
 minimize FuncaoObjetivo: ke *(sum{(i, j) in Ol}(R[i, j] * Isqr[i, j]));
@@ -87,21 +99,20 @@ subject to BalancoPotenciaAtiva{i in Ob}:
 
 #Balanco de Potencia Reativa
 subject to BalancoPotenciaReativa{i in Ob}:
-	sum{(k,i) in Ol}(Q[k,i]) - sum{(i,j) in Ol}( Q[i,j] + X[i,j] * Isqr[i,j] ) + QS[i] = QD[i];
+	sum{(k,i) in Ol}(Q[k,i]) - sum{(i,j) in Ol}( Q[i,j] + X[i,j] * Isqr[i,j] ) + QS[i]  = QD[i];
 	
 #Queda de Tensao no circuito
 subject to QuedaTensao{(i,j) in Ol}:
-	Vsqr[i] - 2*(R[i,j] * P[i,j] + X[i,j]*Q[i,j]) - Z2[i,j] * Isqr[i,j] - Vsqr[j] - b[i,j] = 0;
+	Vsqr[i] - 2*(R[i,j] * P[i,j] + X[i,j]*Q[i,j]) - Z2[i,j] * Isqr[i,j] - Vsqr[j]  = 0;
 	
 #Potencia aparente (kVA)
 subject to PotenciaAparente{(i,j) in Ol}:
 	(Vmin^2 + 0.5 * DeltaV) * Isqr[i,j] + sum{s in 1..S}(Pc[j,s]) = sum{y in 1..Y}(ms[i,j,y]*DP[i,j,y]) + sum{y in 1..Y}(ms[i,j,y]*DQ[i,j,y]);
 	
 #-------------------------------------------------------------------------------	
-# Limite de corrente colocar variaiveis 33 ate 40 
-subject to LimiteCorrente{(i,j) in Ol}:
-	0 <= Isqr[i,j];
+# Equações de reconfiguração
 
+	
 #---------------------------------------------------------------
 # Limite das tensoes
 
@@ -136,7 +147,8 @@ subject to LinearizacaoP4{j in Ob, s in 2..S}:
 	
 
 	
-#---------------------------------------------------------------	
+#---------------------------------------------------------------
+#Equações de linearização	
 subject to LinearizacaoP1{(i,j) in Ol}:
  Pmax[i,j] - Pmin[i,j] = P[i,j];
  
@@ -157,5 +169,7 @@ subject to LinearizacaoP3{(i,j) in Ol, y in 1..Y}:
  
  subject to LinearizacaoQ3{(i,j) in Ol, y in 1..Y}:
   DQ[i,j,y]<= DS[i,j];
- 
- 
+  
+  
+# ---------------------------------------------------------
+ # Equações da GD

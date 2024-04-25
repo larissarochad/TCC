@@ -44,7 +44,7 @@ param  :Ob:   Tb        PD      QD     QC:=
 		33		0		60		40		0;
 										
 #-----------------------------------------------------------------------
-param	 Ol:	 Linha		  R		       X	    Imax:=
+param :  Ol: 	linha   	R			X			Imax:=
 		1	2		1		0.09220		0.04700		1000
 		2	3		2		0.49300		0.25110		1000
 		3	4		3		0.36600		0.18640		1000
@@ -89,7 +89,7 @@ param	 Ol:	 Linha		  R		       X	    Imax:=
 #- Dados das Tensoes -#
 
 let Vnom := 12.66;		#Tensao da rede em kV
-let Vmin := 0.9 * Vnom;		#Tensao minima
+let Vmin := 0.9131 * Vnom;		#Tensao minima
 let Vmax := 1 * Vnom;		#Tensao maxima
   
 #------------------------------------------------------------

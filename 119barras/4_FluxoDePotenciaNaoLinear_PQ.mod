@@ -50,7 +50,7 @@ param N = card(Ob);
 
 # Para a linearização Vsqr * Isqr
 
-param S = 6;
+param S = 5;
 param DeltaV = (Vmax^2-Vmin^2)/(S+1);
 var xv{Ob, s in 1..S}, binary;
 var Pc{Ob, s in 1..S};
@@ -59,7 +59,7 @@ var Pc{Ob, s in 1..S};
 
 # Dados para a Linearizacao P^2 Q^2
 
-param Y = 70;
+param Y = 100;
 param DS{Ol};
 param ms{Ol, y in 1..Y};
 
@@ -81,7 +81,7 @@ param Pgdmin{Ob} = 0; # Pot min ativa injetada pela GD
 param Pgdmax{Ob} = 1000; # Pot max ativa injetada pela GD
 var Pgd{Ob}; # Pot ativa injetada pela GD
 #var Qgd{Ol}; # Pot reativa injetada pela GD
-param Ndg = 2;
+param Ndg = 5;
 var Wgd{Ob}, binary;
 param fp = tan(acos(0.95)); 
 param custoGD = 10000;
@@ -95,15 +95,15 @@ minimize FuncaoObjetivo: ke *(sum{(i, j) in Ol}(R[i, j] * Isqr[i, j]));
 
 #Balanco de Potencia Ativa
 subject to BalancoPotenciaAtiva{i in Ob}:
-	sum{(k,i) in Ol}(P[k,i]) - sum{(i,j) in Ol}( P[i,j] + R[i,j]*Isqr[i,j] ) + PS[i] + Pgd[i] = PD[i];
+	sum{(k,i) in Ol}(P[k,i]) - sum{(i,j) in Ol}( P[i,j] + R[i,j]*Isqr[i,j] ) + PS[i] = PD[i];
 
 #Balanco de Potencia Reativa
 subject to BalancoPotenciaReativa{i in Ob}:
-	sum{(k,i) in Ol}(Q[k,i]) - sum{(i,j) in Ol}( Q[i,j] + X[i,j] * Isqr[i,j] ) + QS[i] + (Pgd[i]*fp) = QD[i];
+	sum{(k,i) in Ol}(Q[k,i]) - sum{(i,j) in Ol}( Q[i,j] + X[i,j] * Isqr[i,j] ) + QS[i]= QD[i];
 	
 #Queda de Tensao no circuito
 subject to QuedaTensao{(i,j) in Ol}:
-	Vsqr[i] - 2*(R[i,j] * P[i,j] + X[i,j]*Q[i,j]) - Z2[i,j] * Isqr[i,j] - Vsqr[j] - b[i,j] = 0;
+	Vsqr[i] - 2*(R[i,j] * P[i,j] + X[i,j]*Q[i,j]) - Z2[i,j] * Isqr[i,j] - Vsqr[j] = 0;
 	
 #Potencia aparente (kVA)
 subject to PotenciaAparente{(i,j) in Ol}:
@@ -112,40 +112,6 @@ subject to PotenciaAparente{(i,j) in Ol}:
 #-------------------------------------------------------------------------------	
 # Equações de reconfiguração
 # Limite de corrente colocar variaiveis 33 ate 40 
-subject to LimiteCorrente{(i,j) in Ol}:
-	0 <= Isqr[i,j];
-subject to LimiteCorrente2{(i,j) in Ol}:
- Isqr[i,j] <= (Imax[i,j]^2)*(ymax[i,j] + ymin[i,j]); 
- 
-# Limites das variaveis Pmax
-subject to LimitePotAux{(i,j) in Ol}:
- Pmax[i,j] <= Vmax * Imax[i,j] * ymax[i,j]; 
-
-# Limites das variaveis Pmin
-subject to LimitePotAux2{(i,j) in Ol}:
-	 Pmin[i,j] <= Vmax * Imax[i,j] * ymin[i,j];
-
-# Limite da potencia reativa 
-subject to LimitePotReAux{(i,j) in Ol}:
-	-(Vmax * Imax[i,j]* (ymax[i,j] + ymin[i,j])) <= Q[i,j];
-
-subject to LimitePotReAux2{(i,j) in Ol}:
-	Q[i,j] <= (Vmax * Imax[i,j]* (ymax[i,j] + ymin[i,j]));
-
-#Limite de potencia da variavel auxiliar 
-subject to AuxB{(i,j) in Ol}: 
-	-(Vmax^2 - Vmin^2)*(1 - (ymax[i,j] + ymin[i,j])) <= b[i,j]; 
-
-subject to AuxB2{(i,j) in Ol}: 
-	b[i,j] <= (Vmax^2 - Vmin^2)*(1 - (ymax[i,j] + ymin[i,j])); 
-
-# Garante a radialidade do sistema
-subject to Radial: 
-	sum{(i,j) in Ol}(ymax[i,j] + ymin[i,j]) = N - 1;
-	
-# direção do fluxo de potência no ramo ij	
-subject to Dfluxo{(i,j) in Ol}:
-	(ymax[i,j] + ymin[i,j]) <= 1; 
 	
 #---------------------------------------------------------------
 # Limite das tensoes
@@ -207,12 +173,3 @@ subject to LinearizacaoP3{(i,j) in Ol, y in 1..Y}:
   
 # ---------------------------------------------------------
  # Equações da GD
-  # Equações da GD
- subject to GD1{i in Ob}:
- Pgdmin[i] * Wgd[i] <= Pgd[i];
- 
- subject to GD2{i in Ob}:
- Pgdmax[i] * Wgd[i] >= Pgd[i];
- 
- subject to GD3:
- sum{i in Ob}(Wgd[i]) <= Ndg;
