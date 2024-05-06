@@ -17,6 +17,7 @@ param QC{Ob};	#Pot Reativa dos capacitores na barra
 param Vnom;
 param Vmin;
 param Vmax;
+param Vini{Ob};
 
 # Dados das linhas
 param R{Ol};	#Resistencia
@@ -24,7 +25,8 @@ param X{Ol};	#Reatancia indutiva
 param Imax{Ol};	#Corrente maxima
 param Z2{Ol};	#Z^2 = R^2 + X^2
 param linha{Ol};
-
+param Barra_SE;
+param L{Ol};
 
 #-- Definir as Variaveis --#
 
@@ -50,7 +52,7 @@ param N = card(Ob);
 
 # Para a linearização Vsqr * Isqr
 
-param S = 6;
+param S = 0;
 param DeltaV = (Vmax^2-Vmin^2)/(S+1);
 var xv{Ob, s in 1..S}, binary;
 var Pc{Ob, s in 1..S};
@@ -59,7 +61,7 @@ var Pc{Ob, s in 1..S};
 
 # Dados para a Linearizacao P^2 Q^2
 
-param Y = 70;
+param Y = 50;
 param DS{Ol};
 param ms{Ol, y in 1..Y};
 
@@ -89,17 +91,17 @@ param idf = 0.1; # para considerar o retorno do capital em 20 anos
 #-------------------------------------------------------------------
 #-- Funcao Objetivo --#
 
-minimize FuncaoObjetivo: ke *(sum{(i, j) in Ol}(R[i, j] * Isqr[i, j]));
+minimize FuncaoObjetivo: (sum{(i, j) in Ol}(R[i, j] * Isqr[i, j]));
 
 #-- Restricoes --#
 
 #Balanco de Potencia Ativa
 subject to BalancoPotenciaAtiva{i in Ob}:
-	sum{(k,i) in Ol}(P[k,i]) - sum{(i,j) in Ol}( P[i,j] + R[i,j]*Isqr[i,j] ) + PS[i] + Pgd[i] = PD[i];
+	sum{(k,i) in Ol}(P[k,i]) - sum{(i,j) in Ol}( P[i,j] + R[i,j]*Isqr[i,j] ) + PS[i] = PD[i];
 
 #Balanco de Potencia Reativa
 subject to BalancoPotenciaReativa{i in Ob}:
-	sum{(k,i) in Ol}(Q[k,i]) - sum{(i,j) in Ol}( Q[i,j] + X[i,j] * Isqr[i,j] ) + QS[i] + (Pgd[i]*fp) = QD[i];
+	sum{(k,i) in Ol}(Q[k,i]) - sum{(i,j) in Ol}( Q[i,j] + X[i,j] * Isqr[i,j] ) + QS[i] = QD[i];
 	
 #Queda de Tensao no circuito
 subject to QuedaTensao{(i,j) in Ol}:
@@ -208,6 +210,7 @@ subject to LinearizacaoP3{(i,j) in Ol, y in 1..Y}:
 # ---------------------------------------------------------
  # Equações da GD
   # Equações da GD
+    # Equações da GD
  subject to GD1{i in Ob}:
  Pgdmin[i] * Wgd[i] <= Pgd[i];
  

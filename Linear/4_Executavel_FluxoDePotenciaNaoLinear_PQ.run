@@ -20,17 +20,18 @@ include 4_FluxoDePotenciaNaoLinear_PQ.mod;
 
 data;
 
-include 4_Sistema_69_Barras_PQ.dat;
+#include 4_Sistma_69_2.dat;
 #include 33_barras.dat;
 #include 119_barras.dat;
+include 119.dat;
 #--------------------
 # solucionador
 
 
-option solver cplexamp;
+option solver cplex;
 option presolve_eps 8.53e-15;
 solve FuncaoObjetivo;
-option cplex_options "time=1000";
+option cplex_options "time=1000 mipdisplay = 2 "; 
 
 param Vpu{Ob};
 param Pperdas{Ol}; # Perda de potencia ativa nas linhas
